@@ -1,2 +1,3 @@
 # kilobits
-More headless components for Svelte.
+
+Unstyled Svelte components for accessible user interfaces.
