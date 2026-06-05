@@ -8,6 +8,10 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter()
 	},
+	onwarn(warning, defhandler) {
+		if (['state_referenced_locally'].includes(warning.code)) return;
+		defhandler(warning.code);
+	},
 	vitePlugin: {
 		dynamicCompileOptions: ({ filename }) =>
 			filename.includes('node_modules') ? undefined : { runes: true }

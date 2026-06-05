@@ -3,6 +3,7 @@
 	import type { Component } from 'svelte';
 	import { useStyle, isComponent } from '$lib/index.js';
 	import { useDebounce, watch } from 'runed';
+	import { cn } from 'tailwind-variants';
 
 	export type IconProps = SvelteHTMLElements['base'] & {
 		name?: string | Component;
@@ -51,8 +52,8 @@
 </script>
 
 {#if typeof name === 'string' && name.length > 0}
-	<div {...rest as SvelteHTMLElements['div']} class={[name, classname]}></div>
+	<div {...rest as SvelteHTMLElements['div']} class={cn(name, classname)}></div>
 {:else if isComponent(name)}
 	{@const Icon = name}
-	<Icon {...{ rest, class: classname }} />
+	<Icon {...{ ...rest, class: cn(classname) }} />
 {/if}
