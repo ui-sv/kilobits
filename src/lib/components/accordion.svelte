@@ -4,16 +4,29 @@
 	import { cn, type ClassValue } from 'tailwind-variants';
 	import type { Component } from 'vitest-browser-svelte';
 
-	export type AccordionItem<T> = {
-		value?: T;
+	export type AccordionItem = {
+		value?: string;
 		content?: string | Snippet | Component;
 		title?: string | Snippet | Component;
 	};
 
-	export type AccordionProps<T> = {
+	export type AccordionMultiple = AccordionBaseProps & {
+		type?: 'multiple';
+		onchange?: (v: string[]) => void;
+		value?: string[];
+		trigger?: Snippet<[{ item: AccordionItem; value?: string[] }]>;
+	};
+
+	export type AccordionSingle = AccordionBaseProps & {
+		type?: 'single';
+		onchange?: (v: string) => void;
+		value?: string;
+		trigger?: Snippet<[{ item: AccordionItem; value?: string }]>;
+	};
+
+	export type AccordionBaseProps = {
 		ref?: HTMLElement;
-		items: Array<AccordionItem<T>>;
-		type?: 'multiple' | 'single';
+		items: Array<AccordionItem>;
 		ui?: {
 			root?: ClassValue;
 			item?: ClassValue;
@@ -21,32 +34,49 @@
 			trigger?: ClassValue;
 			content?: ClassValue;
 		};
-		trigger?: Snippet<[]>;
 	};
+
+	export type AccordionProps = AccordionSingle | AccordionMultiple;
 </script>
 
-<script lang="ts" generics="T extends string | number">
-	let { ref = $bindable(), items, ui = {}, type = 'single', ...rest }: AccordionProps<T> = $props();
+<script lang="ts">
+	let {
+		value = $bindable(),
+		ref = $bindable(),
+		items,
+		ui = {},
+		type = 'single',
+		trigger,
+		onchange = () => {},
+		...rest
+	}: AccordionProps = $props();
 </script>
 
-<Accordion.Root bind:ref class={cn(ui.root)} {type} {...rest}>
+<Accordion.Root
+	bind:value={
+		() => value as string,
+		(v) => {
+			value = v;
+		}
+	}
+	bind:ref
+	class={cn(ui.root)}
+	type={type as 'single'}
+	onValueChange={(v: unknown) => {
+		onchange(v as string[] & string);
+	}}
+	{...rest}
+>
 	{#each items as item, idx (idx)}
 		<Accordion.Item
-			value={(item.value === undefined ? idx : item.value) as string}
+			value={item.value || idx.toString()}
 			class="border-dark-10 group border-b px-1.5"
 		>
 			<Accordion.Header>
-				<Accordion.Trigger
-					class="flex w-full flex-1 select-none items-center justify-between py-5 text-[15px] font-medium transition-all [&[data-state=open]>span>svg]:rotate-180"
-				>
-					<span class="w-full text-left">
-						{item.title}
-					</span>
-					<span
-						class="hover:bg-dark-10 inline-flex size-8 items-center justify-center rounded-[7px] bg-transparent"
-					>
-						<CaretDown class="size-[18px] transition-transform duration-200" />
-					</span>
+				<Accordion.Trigger class={cn(ui.trigger)}>
+					{#if trigger}
+						{@render trigger({ item, value })}
+					{/if}
 				</Accordion.Trigger>
 			</Accordion.Header>
 			<Accordion.Content

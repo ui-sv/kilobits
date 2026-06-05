@@ -13,7 +13,7 @@
 		disabled = false,
 		ref = $bindable(),
 		class: classname,
-		...restProps
+		...rest_props
 	}: ButtonProps = $props();
 </script>
 
@@ -28,7 +28,7 @@
 	bind:this={ref}
 	class={cn(classname)}
 	{disabled}
-	{...restProps}
+	{...rest_props}
 >
 	{@render children?.()}
 </svelte:element>
