@@ -1,0 +1,160 @@
+<script module lang="ts">
+	import { getAppContext } from '$lib/contexts.js';
+	import { type PropColor, Icon } from '$lib/index.js';
+	import type { Snippet, Component } from 'svelte';
+	import { tv, type ClassValue } from 'tailwind-variants';
+
+	export type SwitchProps = {
+		value?: boolean;
+		color?: PropColor;
+		size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+		disabled?: boolean;
+		loading?: boolean;
+		loadingicon?: string | Component;
+		uncheckedicon?: string | Component;
+		checkedicon?: string | Component;
+		label?: string | Snippet;
+		description?: string | Snippet;
+		required?: boolean;
+		ui?: {
+			root?: ClassValue;
+			container?: ClassValue;
+			thumb?: ClassValue;
+			label?: ClassValue;
+			description?: ClassValue;
+		};
+	};
+</script>
+
+<script lang="ts">
+	let {
+		value = $bindable(false),
+		color = 'primary',
+		size = 'md',
+		disabled,
+		loading,
+		loadingicon = getAppContext().icons.loading,
+		uncheckedicon,
+		checkedicon,
+		label,
+		description,
+		required,
+		ui = {},
+	}: SwitchProps = $props();
+
+	const variants = $derived.by(() =>
+		tv({
+			slots: {
+				root: 'flex-inline gap-2',
+				container: 'rounded-full bg-surface-accented p-0.5 relative transition',
+				thumb: [
+					'bg-white block rounded-full absolute top-0.5 transition grid place-items-center',
+					value ? 'translate-x-full' : 'text-label-muted',
+				],
+				icon: 'pi',
+				label: 'text-sm',
+				description: 'text-sm text-label-muted',
+			},
+			variants: {
+				color: {
+					primary: {
+						container: ['', value && 'bg-primary-500 text-primary-500'],
+					},
+					surface: {
+						container: ['', value && 'bg-surface-inverted text-surface-inverted'],
+					},
+					info: {
+						container: ['', value && 'bg-info-500 text-info-500'],
+					},
+					success: {
+						container: ['', value && 'bg-success-500 text-success-500'],
+					},
+					warning: {
+						container: ['', value && 'bg-warning-500 text-warning-500'],
+					},
+					error: {
+						container: ['', value && 'bg-error-500 text-error-500'],
+					},
+				},
+				size: {
+					xs: {
+						container: 'w-7 min-w-7 h-4',
+						thumb: 'size-3',
+						icon: 'size-2.5',
+					},
+					sm: {
+						container: 'w-8 min-w-8 h-4.5',
+						thumb: 'size-3.5',
+						icon: 'size-3',
+					},
+					md: {
+						container: 'w-9 min-w-9 h-5',
+						thumb: 'size-4',
+						icon: 'size-3.5',
+					},
+					lg: {
+						container: 'w-10 min-w-10 h-5.5',
+						thumb: 'size-4.5',
+						icon: 'size-4',
+					},
+					xl: {
+						container: 'w-11  min-w-11 h-6',
+						thumb: 'size-5',
+						icon: 'size-4.5',
+					},
+				},
+			},
+			compoundVariants: [],
+		})({ color, size }),
+	);
+</script>
+
+<div
+	data-state={value ? 'checked' : 'unchecked'}
+	class={variants.root({
+		class: [(loading || disabled) && 'opacity-50', ui.thumb],
+	})}
+>
+	<button
+		aria-label="switch"
+		data-state={value ? 'checked' : 'unchecked'}
+		class={variants.container({ class: [loading && 'cursor-not-allowed', ui.thumb] })}
+		onclick={() => {
+			if (loading || disabled) return;
+			value = !value;
+		}}
+	>
+		<span data-state={value ? 'checked' : 'unchecked'} class={variants.thumb({ class: ui.thumb })}>
+			<Icon
+				name={loading ? loadingicon : value ? checkedicon : uncheckedicon}
+				class={variants.icon({ class: [loading && 'animate-spin'] })}
+			/>
+		</span>
+	</button>
+
+	{#if label}
+		<span>
+			<div
+				class={variants.label({
+					class: [required ? 'after:content-["*"] after:text-error-500' : '', ui.thumb],
+				})}
+			>
+				{#if typeof label === 'string'}
+					{label}
+				{:else}
+					{@render label()}
+				{/if}
+			</div>
+
+			{#if description}
+				<div class={variants.description({ class: ui.thumb })}>
+					{#if typeof description === 'string'}
+						{description}
+					{:else}
+						{@render description()}
+					{/if}
+				</div>
+			{/if}
+		</span>
+	{/if}
+</div>

@@ -1,0 +1,232 @@
+<script module lang="ts">
+	import { type PropColor, type PropVariant } from '$lib/index.js';
+	import type { Component, Snippet } from 'svelte';
+	import { tv, type ClassValue } from 'tailwind-variants';
+	import { Time } from '$lib/date.js';
+
+	export { default as InputTime } from './input-time.svelte';
+
+	export type InputTimeProps = {
+		id?: string;
+		name?: string;
+		hourcycle?: 12 | 24;
+		max?: Time;
+		min?: Time;
+		/**
+		 * The placeholder text when the input is empty.
+		 */
+		placeholder?: string;
+		/**
+		 * @default primary
+		 */
+		color?: PropColor;
+		/**
+		 * @default outline
+		 */
+		variant?: Exclude<PropVariant, 'solid'>;
+		/**
+		 * @default md
+		 */
+		size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+		/**
+		 * @default off
+		 */
+		autocomplete?: 'on' | 'off';
+		/**
+		 * @default false
+		 */
+		autofocus?: boolean | number;
+		disabled?: boolean;
+		/**
+		 * Highlight the ring color like a focus state.
+		 */
+		highlight?: boolean;
+		value?: Time;
+		icon?: string | Snippet | Component;
+		ui?: {
+			root?: ClassValue;
+			leading?: ClassValue;
+			icon?: ClassValue;
+			trailing?: ClassValue;
+			segment?: ClassValue;
+		};
+	};
+</script>
+
+<script lang="ts">
+	import { TimeField } from 'bits-ui';
+
+	let {
+		hourcycle = 12,
+		value = $bindable(),
+		color = 'primary',
+		variant = 'outline',
+		size = 'md',
+		icon,
+		disabled,
+		highlight,
+		ui = {},
+		...rest
+	}: InputTimeProps = $props();
+
+	const variants = $derived(
+		tv({
+			slots: {
+				root: 'inline-flex items-center rounded transition-all ring ring-inset ring-transparent',
+				leading: 'text-label-muted',
+				trailing: 'text-label-muted',
+				icon: '',
+				segment: [
+					'rounded text-center outline-hidden transition-all focus:bg-surface-accented shrink',
+					'aria-[valuetext="Empty"]:text-label-dimmed data-[segment="literal"]:text-label-muted data-[segment="literal"]:px-1 data-invalid:text-error data-disabled:cursor-not-allowed data-disabled:opacity-75',
+				],
+			},
+			variants: {
+				fieldGroup: {
+					horizontal: {
+						root: '',
+					},
+					vertical: {
+						root: '',
+					},
+				},
+				size: {
+					xs: {
+						root: 'px-2 h-6 text-xs',
+						leading: 'ps-2',
+						trailing: 'pe-2',
+						icon: 'size-4',
+						segment: 'px-1',
+					},
+					sm: {
+						root: 'px-2.5 h-7 text-xs',
+						leading: 'ps-2.5',
+						trailing: 'pe-2.5',
+						icon: 'size-4',
+						segment: 'px-1',
+					},
+					md: {
+						root: 'px-2.5 h-8 text-sm',
+						leading: 'ps-2.5',
+						trailing: 'pe-2.5',
+						icon: 'size-5',
+						segment: 'px-2',
+					},
+					lg: {
+						root: 'px-3 h-9 text-sm',
+						leading: 'ps-3',
+						trailing: 'pe-3',
+						icon: 'size-5',
+						segment: 'px-3',
+					},
+					xl: {
+						root: 'px-3 h-10 text-base',
+						leading: 'ps-3',
+						trailing: 'pe-3',
+						icon: 'size-6',
+						segment: 'px-3',
+					},
+				},
+				variant: {
+					outline: { root: 'ring ring-surface-accented' },
+					soft: {
+						root: 'bg-surface-muted hover:bg-surface-elevated focus-within:bg-surface-elevated',
+					},
+					subtle: { root: 'ring ring-accented' },
+					ghost: { root: 'hover:bg-surface-elevated focus-within:bg-surface-elevated' },
+					none: { root: '' },
+				},
+				color: {
+					primary: { root: '' },
+					surface: { root: '' },
+					info: { root: '' },
+					success: { root: '' },
+					warning: { root: '' },
+					error: { root: '' },
+				},
+				leading: {
+					false: { leading: 'hidden' },
+				},
+				trailing: {
+					false: { trailing: 'hidden' },
+				},
+				loading: {
+					true: '',
+				},
+				highlight: {
+					true: '',
+				},
+				type: {
+					file: 'file:me-1.5 file:font-medium file:text-label-muted file:outline-none',
+				},
+			},
+			compoundVariants: [
+				{
+					color: 'primary',
+					variant: ['outline', 'subtle'],
+					highlight: true,
+					class: {
+						root: 'ring-primary-500 ring-2',
+					},
+				},
+				{
+					color: 'surface',
+					variant: ['outline', 'subtle'],
+					highlight: true,
+					class: {
+						root: 'ring-surface-inverted ring-2',
+					},
+				},
+				{
+					color: 'info',
+					variant: ['outline', 'subtle'],
+					highlight: true,
+					class: {
+						root: 'ring-info-500 ring-2',
+					},
+				},
+				{
+					color: 'success',
+					variant: ['outline', 'subtle'],
+					highlight: true,
+					class: {
+						root: 'ring-success-500 ring-2',
+					},
+				},
+				{
+					color: 'warning',
+					variant: ['outline', 'subtle'],
+					highlight: true,
+					class: {
+						root: 'ring-warning-500 ring-2',
+					},
+				},
+				{
+					color: 'error',
+					variant: ['outline', 'subtle'],
+					highlight: true,
+					class: {
+						root: 'ring-error-500 ring-2',
+					},
+				},
+			],
+		})({
+			size,
+			color,
+			variant,
+			highlight,
+		}),
+	);
+</script>
+
+<TimeField.Root bind:value hourCycle={hourcycle}>
+	<TimeField.Input name="hello" class={variants.root({ class: ui.root })}>
+		{#snippet children({ segments })}
+			{#each segments as { part, value }, i (part + i)}
+				<TimeField.Segment {part} class={variants.segment({ class: ui.segment })}>
+					{value}
+				</TimeField.Segment>
+			{/each}
+		{/snippet}
+	</TimeField.Input>
+</TimeField.Root>

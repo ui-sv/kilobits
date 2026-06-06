@@ -1,0 +1,58 @@
+import { createContext } from 'svelte';
+import type { ToasterProps } from 'svelte-sonner';
+import type { ModeWatcherProps } from './mode.js';
+import type { TooltipProviderProps } from 'bits-ui';
+
+export const DEFAULT_ICONS = {
+	arrowdown: 'i-lucide:arrow-down',
+	arrowleft: 'i-lucide:arrow-left',
+	arrowright: 'i-lucide:arrow-right',
+	arrowup: 'i-lucide:arrow-up',
+	caution: 'i-lucide:circle-alert',
+	check: 'i-lucide:check',
+	chevrondoubleleft: 'i-lucide:chevron-double-left',
+	chevrondoubleright: 'i-lucide:chevron-double-right',
+	chevrondown: 'i-lucide:chevron-down',
+	chevronleft: 'i-lucide:chevron-left',
+	chevronright: 'i-lucide:chevron-right',
+	chevronup: 'i-lucide:chevron-up',
+	close: 'i-lucide:x',
+	copy: 'i-lucide:copy',
+	copycheck: 'i-lucide:circle-check',
+	dark: 'i-lucide:moon',
+	drag: 'i-lucide:grip-vertical',
+	ellipsis: 'i-lucide:ellipsis',
+	error: 'i-lucide:circle-x',
+	external: 'i-lucide:arrow-up-right',
+	eye: 'i-lucide:eye',
+	eyeoff: 'i-lucide:eye-slash',
+	file: 'i-lucide:file',
+	folder: 'i-lucide:folder',
+	folderopen: 'i-lucide:folder-open',
+	hash: 'i-lucide:hash',
+	info: 'i-lucide:info',
+	light: 'i-lucide:sun',
+	loading: 'i-lucide:loader-circle',
+	menu: 'i-lucide:list',
+	minus: 'i-lucide:minus',
+	panelclose: 'i-lucide:caret-left',
+	panelopen: 'i-lucide:caret-right',
+	plus: 'i-lucide:plus',
+	reload: 'i-lucide:arrow-counter-clockwise',
+	search: 'i-lucide:magnifying-glass',
+	stop: 'i-lucide:square',
+	success: 'i-lucide:check-circle',
+	system: 'i-lucide:monitor',
+	tip: 'i-lucide:lightbulb',
+	upload: 'i-lucide:upload',
+	warning: 'i-lucide:warning',
+};
+
+export type AppContext = {
+	icons: Partial<typeof DEFAULT_ICONS>;
+	toaster: Partial<ToasterProps>;
+	modewatcher: ModeWatcherProps;
+	tooltip: TooltipProviderProps;
+};
+
+export const [getAppContext, setAppContext] = createContext<AppContext>();

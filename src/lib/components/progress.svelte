@@ -1,22 +1,22 @@
 <script module lang="ts">
 	import type { PropColor } from '$lib/index.js';
-	import type { ClassNameValue } from 'tailwind-merge';
-	import { tv } from 'tailwind-variants';
+	import { tv, type ClassValue } from 'tailwind-variants';
 
 	export type ProgressProps = {
 		value?: number;
 		max?: number | string[];
 		animation?: 'swing' | 'carousel' | 'carousel-inverse' | 'elastic';
-		orientation?: 'horizontal' | 'veritcal';
+		orientation?: 'horizontal' | 'vertical';
 		color?: PropColor;
-		height?: number;
+		size?: '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 		inverted?: boolean;
 		status?: boolean;
 		ui?: {
-			base?: ClassNameValue;
-			header?: ClassNameValue;
-			content?: ClassNameValue;
-			footer?: ClassNameValue;
+			base?: ClassValue;
+			header?: ClassValue;
+			content?: ClassValue;
+			footer?: ClassValue;
+			indicator?: ClassValue;
 		};
 	};
 </script>
@@ -27,11 +27,11 @@
 		animation,
 		inverted,
 		status,
-		value,
+		value = 0,
 		orientation = 'horizontal',
 		color = 'primary',
-		height = '',
-		ui = {}
+		size = 'md',
+		ui = {},
 	}: ProgressProps = $props();
 
 	const percentage = $derived.by(() => {
@@ -47,53 +47,87 @@
 
 		return false;
 	});
-	const classes = $derived.by(() =>
+	const variants = $derived.by(() =>
 		tv({
 			slots: {
-				root: 'relative w-full rounded-full overflow-hidden bg-surface-300',
+				root: 'relative w-full rounded-full overflow-hidden bg-surface-accented',
 				status: '',
 				indicator: 'absolute transition-all rounded-full',
-				steps: ''
+				steps: '',
 			},
 			variants: {
 				color: {
 					primary: {
-						indicator: 'bg-primary-500'
+						indicator: 'bg-primary-500',
 					},
 					surface: {
-						indicator: 'bg-surface-500'
+						indicator: 'bg-label-muted',
 					},
 					info: {
-						indicator: 'bg-info-500'
+						indicator: 'bg-info-500',
 					},
 					success: {
-						indicator: 'bg-success-500'
+						indicator: 'bg-success-500',
 					},
 					warning: {
-						indicator: 'bg-warning-500'
+						indicator: 'bg-warning-500',
 					},
 					error: {
-						indicator: 'bg-error-500'
-					}
+						indicator: 'bg-error-500',
+					},
+				},
+				size: {
+					'2xs': '',
+					xs: '',
+					sm: '',
+					md: '',
+					lg: '',
+					xl: '',
+					'2xl': '',
+				},
+				orientation: {
+					vertical: { indicator: 'w-full top-0 h-(--ui-progress-percentage)' },
+					horizontal: { indicator: 'h-full left-0 w-(--ui-progress-percentage)' },
 				},
 				animation: {
 					swing: [indeterminate ? 'animate-[swing_2s_ease-in-out_infinite' : ''],
 					carousel: [indeterminate ? '' : ''],
 					'carousel-inverse': [indeterminate ? '' : ''],
-					elastic: [indeterminate ? '' : '']
-				}
+					elastic: [indeterminate ? '' : ''],
+				},
 			},
-			compoundVariants: []
+			compoundVariants: [
+				{ orientation: 'horizontal', size: '2xs', class: { root: 'h-px' } },
+				{ orientation: 'horizontal', size: 'xs', class: { root: 'h-0.5' } },
+				{ orientation: 'horizontal', size: 'sm', class: { root: 'h-1' } },
+				{ orientation: 'horizontal', size: 'md', class: { root: 'h-2' } },
+				{ orientation: 'horizontal', size: 'lg', class: { root: 'h-3' } },
+				{ orientation: 'horizontal', size: 'xl', class: { root: 'h-4' } },
+				{ orientation: 'horizontal', size: '2xl', class: { root: 'h-5' } },
+
+				{ orientation: 'vertical', size: '2xs', class: { root: 'w-px' } },
+				{ orientation: 'vertical', size: 'xs', class: { root: 'w-0.5' } },
+				{ orientation: 'vertical', size: 'sm', class: { root: 'w-1' } },
+				{ orientation: 'vertical', size: 'md', class: { root: 'w-2' } },
+				{ orientation: 'vertical', size: 'lg', class: { root: 'w-3' } },
+				{ orientation: 'vertical', size: 'xl', class: { root: 'w-4' } },
+				{ orientation: 'vertical', size: '2xl', class: { root: 'w-5' } },
+			],
 		})({
 			color,
-			animation: animation ?? 'swing'
-		})
+			animation: animation ?? 'swing',
+			size,
+			orientation,
+		}),
 	);
 </script>
 
 <div data-state-indeterminate={indeterminate}>
-	<div class={classes.root({ class: [ui.base] })} style:height={`${height || 8}px`}>
-		<span class={classes.indicator({ class: ['h-full left-0'] })} style:width={`${percentage}%`}>
+	<div class={variants.root({ class: [ui.base] })}>
+		<span
+			class={variants.indicator({ class: ui.indicator })}
+			style:--ui-progress-percentage={`${percentage}%`}
+		>
 		</span>
 	</div>
 
@@ -101,7 +135,7 @@
 		<p
 			class={[
 				'text-right transition',
-				value && value > 0 && max[value] ? 'text-primary-500' : 'text-surface-500'
+				value && value > 0 && max[value] ? 'text-primary-500' : 'text-label-muted',
 			]}
 		>
 			{(value && max[value]) || max[0]}
@@ -110,15 +144,17 @@
 </div>
 
 <style>
-	@keyframe swing {
-		0% {
-			width: 0%;
-		}
-		50% {
-			width: 100%;
-		}
-		100% {
-			width: 0%;
+	:global {
+		@keyframes swing {
+			0% {
+				width: 0%;
+			}
+			50% {
+				width: 100%;
+			}
+			100% {
+				width: 0%;
+			}
 		}
 	}
 </style>

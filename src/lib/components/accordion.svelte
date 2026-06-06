@@ -1,91 +1,67 @@
 <script module lang="ts">
-	import { Accordion, type AccordionRootProps } from 'bits-ui';
-	import type { Snippet } from 'svelte';
-	import { cn, type ClassValue } from 'tailwind-variants';
-	import type { Component } from 'vitest-browser-svelte';
+	import { getAppContext } from '$lib/contexts.js';
+	import { Accordion } from 'bits-ui';
+	import type { Component, Snippet } from 'svelte';
+	import { cn, tv, type ClassValue } from 'tailwind-variants';
 
 	export type AccordionItem = {
+		label: string;
+		icon?: string | Snippet | Component;
+		trailingicon?: string | Snippet | Component;
+		content: string;
 		value?: string;
-		content?: string | Snippet | Component;
-		title?: string | Snippet | Component;
+		disabled?: boolean;
 	};
-
-	export type AccordionMultiple = AccordionBaseProps & {
-		type?: 'multiple';
-		onchange?: (v: string[]) => void;
-		value?: string[];
-		trigger?: Snippet<[{ item: AccordionItem; value?: string[] }]>;
-	};
-
-	export type AccordionSingle = AccordionBaseProps & {
-		type?: 'single';
-		onchange?: (v: string) => void;
-		value?: string;
-		trigger?: Snippet<[{ item: AccordionItem; value?: string }]>;
-	};
-
-	export type AccordionBaseProps = {
-		ref?: HTMLElement;
-		items: Array<AccordionItem>;
+	export type AccordionProps = {
+		value?: string | string[];
+		items: AccordionItem[];
+		collapsible?: boolean;
+		disabled?: boolean;
+		type?: 'single' | 'multiple';
+		trailingicon?: string | Snippet | Component;
+		leading?: Snippet<[{ item: AccordionItem; index: number; open: boolean }]>;
+		default?: Snippet<[{ item: AccordionItem; index: number; open: boolean }]>;
+		trailing?: Snippet<[{ item: AccordionItem; index: number; open: boolean }]>;
+		content?: Snippet<[{ item: AccordionItem; index: number; open: boolean }]>;
+		body?: Snippet<[{ item: AccordionItem; index: number; open: boolean }]>;
 		ui?: {
 			root?: ClassValue;
 			item?: ClassValue;
 			header?: ClassValue;
 			trigger?: ClassValue;
 			content?: ClassValue;
+			body?: ClassValue;
+			leadingicon?: ClassValue;
+			trailingicon?: ClassValue;
+			label?: ClassValue;
 		};
 	};
-
-	export type AccordionProps = AccordionSingle | AccordionMultiple;
 </script>
 
 <script lang="ts">
 	let {
 		value = $bindable(),
-		ref = $bindable(),
 		items,
-		ui = {},
+		collapsible = true,
+		disabled,
 		type = 'single',
-		trigger,
-		onchange = () => {},
-		...rest
+		trailingicon = getAppContext().icons.chevrondown,
+		leading,
+		default: defau,
+		trailing,
+		content,
+		body,
+		ui = {}
 	}: AccordionProps = $props();
 </script>
 
-<Accordion.Root
-	bind:value={
-		() => value as string,
-		(v) => {
-			value = v;
-		}
-	}
-	bind:ref
-	class={cn(ui.root)}
-	type={type as 'single'}
-	onValueChange={(v: unknown) => {
-		onchange(v as string[] & string);
-	}}
-	{...rest}
->
+<Accordion.Root class={cn(ui.root)} {type} bind:value>
 	{#each items as item, idx (idx)}
-		<Accordion.Item
-			value={item.value || idx.toString()}
-			class="border-dark-10 group border-b px-1.5"
-		>
+		<Accordion.Item value="item-{idx}">
 			<Accordion.Header>
-				<Accordion.Trigger class={cn(ui.trigger)}>
-					{#if trigger}
-						{@render trigger({ item, value })}
-					{/if}
-				</Accordion.Trigger>
+				<Accordion.Trigger>{item.label}</Accordion.Trigger>
 			</Accordion.Header>
-			<Accordion.Content
-				class="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm tracking-[-0.01em]"
-			>
-				<div class="pb-[25px]">
-					{item.content}
-				</div>
-			</Accordion.Content>
+			<Accordion.Content>This is the collapsible content for this section.</Accordion.Content>
 		</Accordion.Item>
 	{/each}
 </Accordion.Root>

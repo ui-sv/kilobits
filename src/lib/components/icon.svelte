@@ -3,7 +3,6 @@
 	import type { Component } from 'svelte';
 	import { useStyle, isComponent } from '$lib/index.js';
 	import { useDebounce, watch } from 'runed';
-	import { cn } from 'tailwind-variants';
 
 	export type IconProps = SvelteHTMLElements['base'] & {
 		name?: string | Component;
@@ -24,10 +23,9 @@
 		.${name.replace(':', '\\:')} {
    	        --un-icon: url('data:image/svg+xml,${svg
 							.replaceAll(/[\n\t]/g, '')
-							.replaceAll('"', '"')
+							.replaceAll('"', '\"')
 							.replace('<', '%3C')
 							.replace('>', '%3E')}');
-    		display: inline-block;
     		width: 1em;
     		height: 1em;
     		background-color: currentColor;
@@ -45,15 +43,15 @@
 		() => name,
 		() => {
 			resolve();
-		}
+		},
 	);
 
 	useStyle(() => css_style);
 </script>
 
 {#if typeof name === 'string' && name.length > 0}
-	<div {...rest as SvelteHTMLElements['div']} class={cn(name, classname)}></div>
+	<div {...rest as SvelteHTMLElements['div']} class={[name, classname]}></div>
 {:else if isComponent(name)}
 	{@const Icon = name}
-	<Icon {...{ ...rest, class: cn(classname) }} />
+	<Icon {...rest} class={classname} />
 {/if}
