@@ -1,9 +1,8 @@
 <script module lang="ts">
 	import { getAppContext } from '$lib/contexts.js';
 	import { Icon } from '$lib/index.js';
-	import type { Snippet } from 'svelte';
+	import type { Snippet, Component } from 'svelte';
 	import { cn, type ClassValue } from 'tailwind-variants';
-	import type { Component } from 'vitest-browser-svelte';
 
 	export type CheckboxProps = {
 		value?: boolean | 'intermediate';

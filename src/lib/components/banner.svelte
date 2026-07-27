@@ -17,9 +17,15 @@
 			icon?: ClassValue;
 			description?: ClassValue;
 			title?: ClassValue;
+			header?: ClassValue;
+			leading?: ClassValue;
+			trailing?: ClassValue;
+			center?: ClassValue;
 		};
 		onclose?: () => void | Promise<() => void>;
 		button?: Snippet<[ButtonProps]>;
+		leading?: Snippet;
+		trailing?: Snippet;
 	};
 </script>
 
@@ -33,12 +39,18 @@
 		actions = [],
 		ui = {},
 		onclose = () => {},
-		button
+		button,
+		leading,
+		trailing
 	}: BannerProps = $props();
 </script>
 
-<svelte:element this={href ? 'a' : 'button'} {href} {target} class={cn(ui.base)}>
-	<div class="flex grow gap-2 text-sm items-center">
+<svelte:element this={href ? 'a' : 'button'} {href} {target} class={cn(ui.base)} data-slot="root">
+	<div data-slot="leading" class={cn(ui.leading)}>
+		{@render leading?.()}
+	</div>
+
+	<div data-slot="center" class={cn(ui.center)}>
 		<Icon name={icon} class={cn(ui.icon)} />
 
 		<div class={cn(ui.title)}>
@@ -60,18 +72,20 @@
 		{/if}
 	</div>
 
-	{#if close}
-		{@const props = defu(typeof close === 'boolean' ? {} : close, <ButtonProps>{
-			icon: getAppContext().icons.close,
-			onclick: onclose
-		})}
+	<div data-slot="trailing" class={cn(ui.trailing)}>
+		{#if trailing}
+			{@render trailing()}
+		{:else if close}
+			{@const props = defu(typeof close === 'boolean' ? {} : close, <ButtonProps>{
+				icon: getAppContext().icons.close,
+				onclick: onclose
+			})}
 
-		<div>
 			{#if button}
 				{@render button(props)}
 			{:else}
 				<Button {...props} />
 			{/if}
-		</div>
-	{/if}
+		{/if}
+	</div>
 </svelte:element>

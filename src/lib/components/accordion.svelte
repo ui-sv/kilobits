@@ -61,7 +61,9 @@
 			<Accordion.Header>
 				<Accordion.Trigger>{item.label}</Accordion.Trigger>
 			</Accordion.Header>
-			<Accordion.Content>This is the collapsible content for this section.</Accordion.Content>
+			<Accordion.Content class=""
+				>This is the collapsible content for this section.</Accordion.Content
+			>
 		</Accordion.Item>
 	{/each}
 </Accordion.Root>

@@ -16,9 +16,13 @@
 			icon?: ClassValue;
 			description?: ClassValue;
 			title?: ClassValue;
+			actions?: ClassValue;
+			header?: ClassValue;
+			wrapper?: ClassValue;
 		};
 		onclose?: () => unknown | Promise<() => unknown>;
 		orientation?: 'horizontal' | 'vertical';
+		button?: Snippet<[ButtonProps]>;
 	};
 </script>
 
@@ -31,19 +35,20 @@
 		actions = [],
 		ui = {},
 		onclose = () => {},
-		orientation = 'vertical'
+		orientation = 'vertical',
+		button
 	}: AlertProps = $props();
 </script>
 
 <div class={cn(ui.base)}>
-	<div class="flex gap-2 flex-1">
+	<div class={cn(ui.wrapper)}>
 		{#if isSnippet(icon)}
 			{@render icon()}
 		{:else}
 			<Icon name={icon} class={cn(ui.icon)} />
 		{/if}
 
-		<div class="space-y-1 grow">
+		<div class={cn(ui.header)}>
 			{#if title}
 				<div class={cn(ui.title)}>
 					{#if isSnippet(title)}
@@ -55,7 +60,7 @@
 			{/if}
 
 			{#if description}
-				<div class={cn(ui.title)}>
+				<div class={cn(ui.description)}>
 					{#if isSnippet(description)}
 						{@render description()}
 					{:else}
@@ -70,15 +75,17 @@
 		{/if}
 
 		{#if close}
+			{@const props = defu(typeof close === 'boolean' ? {} : close, <ButtonProps>{
+				icon: getAppContext().icons.close,
+				onclick: onclose
+			})}
+
 			<div>
-				<Button
-					{...defu(typeof close === 'boolean' ? {} : close, {
-						icon: getAppContext().icons.close,
-						variant: 'link',
-						color: 'surface',
-						onclick: onclose
-					} as ButtonProps)}
-				/>
+				{#if button}
+					{@render button(props)}
+				{:else}
+					<Button {...props} />
+				{/if}
 			</div>
 		{/if}
 	</div>
@@ -90,13 +97,13 @@
 
 {#snippet actions_snippet()}
 	{#if actions.length}
-		<div class="flex gap-2 items-center pl-8">
+		<div class={cn(ui.actions)}>
 			{#each actions as action, idx (idx)}
-				<Button
-					{...defu(action, <ButtonProps>{
-						size: 'xs'
-					})}
-				/>
+				{#if button}
+					{@render button(action)}
+				{:else}
+					<Button {...action} />
+				{/if}
 			{/each}
 		</div>
 	{/if}
